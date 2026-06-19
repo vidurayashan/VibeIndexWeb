@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vibe Index — La Trobe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --red: #E2231B;
+    --red-dark: #B81A14;
+    --red-light: #fdf1f0;
+    --black: #000000;
+    --white: #ffffff;
+    --grey: #666666;
+    --light-grey: #f5f5f3;
+    --border: #e8e8e6;
+    --text: #1a1a1a;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--white);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+  }
+
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .nav-logo-mark {
+    width: 32px;
+    height: 32px;
+    background: var(--red);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .nav-logo-mark svg { width: 18px; height: 18px; fill: white; }
+
+  .nav-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 18px;
+    color: var(--black);
+    letter-spacing: 0.02em;
+  }
+
+  .nav-title span { color: var(--red); }
+
+  .nav-badge {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--grey);
+    background: var(--light-grey);
+    padding: 2px 8px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    border-bottom: 1px solid var(--border);
+    padding: 3rem 2rem 2.5rem;
+  }
+
+  .hero-inner { max-width: 860px; margin: 0 auto; }
+
+  .hero-eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 0.75rem;
+  }
+
+  .hero h1 {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 600;
+    color: var(--black);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin-bottom: 1rem;
+  }
+
+  .hero p {
+    font-size: 16px;
+    color: var(--grey);
+    line-height: 1.65;
+    max-width: 560px;
+    margin-bottom: 1.75rem;
+  }
+
+  .search-wrap { position: relative; max-width: 520px; }
+
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--grey);
+    pointer-events: none;
+  }
+
+  .search-icon svg {
+    width: 18px; height: 18px;
+    stroke: currentColor; fill: none;
+    stroke-width: 2; stroke-linecap: round;
+  }
+
+  #search {
+    width: 100%;
+    padding: 11px 16px 11px 42px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+    background: var(--white);
+    color: var(--text);
+    transition: border-color 0.15s;
+  }
+
+  #search:focus {
+    border-color: var(--red);
+    box-shadow: 0 0 0 3px rgba(226,35,27,0.08);
+  }
+
+  #search::placeholder { color: #aaa; }
+
+  .search-count {
+    margin-top: 0.5rem;
+    font-size: 13px;
+    color: var(--grey);
+    min-height: 20px;
+  }
+
+  /* ── TWO-COLUMN LAYOUT ── */
+  .layout {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem 4rem;
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+  }
+
+  /* ── SIDEBAR ── */
+  #keyword-sidebar {
+    width: 210px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 72px;
+    padding-top: 1.5rem;
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+  }
+
+  .sidebar-section { margin-bottom: 1.5rem; }
+
+  .sidebar-heading {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--grey);
+    margin-bottom: 0.6rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .filter-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text);
+    user-select: none;
+    transition: background 0.1s;
+  }
+
+  .filter-item:hover { background: var(--light-grey); }
+
+  .filter-item.active {
+    background: var(--red-light);
+    color: var(--red-dark);
+    font-weight: 500;
+  }
+
+  .filter-item input[type="checkbox"] {
+    accent-color: var(--red);
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .filter-label { flex: 1; }
+
+  .kw-count {
+    font-size: 11px;
+    color: var(--grey);
+    background: var(--light-grey);
+    border-radius: 10px;
+    padding: 1px 6px;
+    flex-shrink: 0;
+  }
+
+  .filter-item.active .kw-count {
+    background: rgba(226,35,27,0.12);
+    color: var(--red-dark);
+  }
+
+  /* ── LIST AREA ── */
+  .list-area {
+    flex: 1;
+    min-width: 0;
+    padding-top: 1.5rem;
+  }
+
+  /* ── LOADING / ERROR ── */
+  .status-msg {
+    padding: 3rem 0;
+    text-align: center;
+    font-size: 15px;
+    color: var(--grey);
+  }
+
+  .status-msg.error { color: #c0392b; }
+
+  /* ── STARTUP CARDS ── */
+  .startup-item {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    border-bottom: 1px solid var(--border);
+    padding: 1.1rem 0.5rem;
+    align-items: start;
+    border-radius: 6px;
+    transition: background 0.1s;
+  }
+
+  .startup-item:hover { background: var(--light-grey); }
+
+  .startup-thumb {
+    width: 56px;
+    height: 42px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    background: var(--light-grey);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .startup-thumb img {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    border-radius: 8px;
+    display: block;
+  }
+
+  .thumb-fallback {
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--red);
+    text-align: center;
+  }
+
+  .startup-content { padding-left: 14px; }
+
+  .startup-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--black);
+    line-height: 1.3;
+    margin-bottom: 2px;
+  }
+
+  .startup-creator {
+    font-size: 13px;
+    color: var(--grey);
+    margin-bottom: 4px;
+  }
+
+  .startup-creator span { color: var(--red); font-weight: 500; }
+
+  .startup-desc {
+    font-size: 14px;
+    color: #444;
+    line-height: 1.55;
+    margin-bottom: 8px;
+  }
+
+  .startup-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 8px;
+  }
+
+  .tag {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--grey);
+    background: var(--light-grey);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2px 8px;
+    letter-spacing: 0.02em;
+  }
+
+  .startup-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .btn-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--red);
+    text-decoration: none;
+    padding: 4px 10px;
+    border: 1px solid rgba(226,35,27,0.25);
+    border-radius: 6px;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .btn-link:hover { background: var(--red-light); border-color: var(--red); }
+
+  .btn-link svg {
+    width: 12px; height: 12px;
+    stroke: currentColor; fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  .empty-state {
+    display: none;
+    padding: 3rem 0;
+    text-align: center;
+  }
+
+  .empty-state p { color: var(--grey); font-size: 15px; }
+  .empty-state strong { color: var(--black); }
+
+  mark {
+    background: rgba(226,35,27,0.12);
+    color: var(--red-dark);
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 2rem;
+    text-align: center;
+    font-size: 12px;
+    color: var(--grey);
+  }
+
+  footer a { color: var(--red); text-decoration: none; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    nav { padding: 0 1rem; }
+    .hero { padding: 2rem 1rem 1.75rem; }
+    .layout {
+      flex-direction: column;
+      padding: 0 1rem 3rem;
+      gap: 0;
+    }
+    #keyword-sidebar {
+      width: 100%;
+      position: static;
+      padding-top: 1.25rem;
+      max-height: none;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+    }
+    .list-area { padding-top: 1rem; }
+    footer { padding: 1.25rem 1rem; }
+    .nav-badge { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#">
+    <div class="nav-logo-mark">
+      <svg viewBox="0 0 20 20"><path d="M3 17L10 3l7 14H3z"/></svg>
+    </div>
+    <span class="nav-title">Vibe <span>Index</span></span>
+  </a>
+  <span class="nav-badge">La Trobe · BUS4012 · 2026</span>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <p class="hero-eyebrow">La Trobe University · 2026 Vibe Coding for Startups Cohort</p>
+    <h1>Student Startups,<br>Built &amp; Shipped.</h1>
+    <p>Every project here was designed, coded, and deployed by La Trobe students in the Vibe Coding for Startups (BUS4012) subject. Browse the live apps below.</p>
+
+    <div class="search-wrap">
+      <span class="search-icon">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </span>
+      <input type="text" id="search" placeholder="Search by startup name or keywords…" autocomplete="off" />
+    </div>
+    <p class="search-count" id="search-count"></p>
+  </div>
+</section>
+
+<main class="layout">
+  <aside id="keyword-sidebar">
+    <div class="sidebar-section">
+      <h3 class="sidebar-heading">Keywords</h3>
+      <div id="keyword-list"></div>
+    </div>
+  </aside>
+
+  <div class="list-area">
+    <div id="startup-list"></div>
+    <div class="empty-state" id="empty-state">
+      <p>No startups match <strong id="empty-query"></strong>. Try a different keyword.</p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>© 2026 La Trobe University · <a href="https://www.latrobe.edu.au" target="_blank">latrobe.edu.au</a> · Vibe Coding for Startups (BUS4012)</p>
+</footer>
+
+<script>
+// ── CONFIG ──
+const EXCEL_FILE = 'Vibe Deployments.xlsx';
+
+// ── CANONICAL KEYWORD CATEGORIES ──
+const CANONICAL_CATEGORIES = [
+  'Student & Academic Management',
+  'Rental & Housing Platforms',
+  'Personal Finance & Expense Tracking',
+  'Mental Health & Wellbeing',
+  'Task & Productivity Management',
+  'AI-Powered Assistants & Automation',
+  'Property & Real Estate Management',
+  'Food & Grocery Solutions',
+  'E-Commerce & Marketplaces',
+  'Health & Healthcare Applications',
+  'Community & Social Networking',
+  'Travel & Mobility',
+  'Career & Employment Tools',
+  'Business Operations & Workflow Management',
+  'Inventory & Asset Management',
+  'Home Services & Trades Platforms',
+  'Fashion & Personal Shopping',
+  'Education Technology (EdTech)',
+  'Data & Analytics Platforms',
+  'Full-Stack Developer Tools & SaaS',
+  'Other',
+];
+
+// Each entry: [ [trigger substrings (lowercase)], canonical category ]
+// First match wins — order matters for ambiguous terms.
+const KEYWORD_MAP = [
+  [['student','academic','enrollment','enrolment','university','college','grade','course management'], 'Student & Academic Management'],
+  [['rental','housing','rent','lease','tenant','landlord','accommodation'], 'Rental & Housing Platforms'],
+  [['personal finance','expense','budget','fintech','money management','savings','spending'], 'Personal Finance & Expense Tracking'],
+  [['mental health','wellbeing','wellness','therapy','anxiety','stress','mindfulness'], 'Mental Health & Wellbeing'],
+  [['task','productivity','todo','to-do','schedule','planner','time management'], 'Task & Productivity Management'],
+  [['ai','artificial intelligence','chatbot','automation','machine learning','llm','assistant'], 'AI-Powered Assistants & Automation'],
+  [['property','real estate','realty','listing management'], 'Property & Real Estate Management'],
+  [['food','grocery','meal','recipe','nutrition','dining','beverage','ingredient'], 'Food & Grocery Solutions'],
+  [['ecommerce','e-commerce','marketplace','shopping','retail','buy and sell','online store'], 'E-Commerce & Marketplaces'],
+  [['health','healthcare','medical','doctor','patient','fitness','clinical','hospital'], 'Health & Healthcare Applications'],
+  [['community','social network','forum','group','connect','peer'], 'Community & Social Networking'],
+  [['travel','transport','mobility','ride','booking','trip','flight','commute'], 'Travel & Mobility'],
+  [['career','job','employment','resume','hiring','recruitment','internship'], 'Career & Employment Tools'],
+  [['business operation','workflow','crm','erp','operations management','process'], 'Business Operations & Workflow Management'],
+  [['inventory','asset management','stock','warehouse','supply chain'], 'Inventory & Asset Management'],
+  [['home service','trades','plumber','electrician','cleaner','handyman','maintenance'], 'Home Services & Trades Platforms'],
+  [['fashion','clothing','style','wardrobe','outfit','personal shopping','apparel'], 'Fashion & Personal Shopping'],
+  [['education','edtech','learning','tutoring','school','teaching','e-learning','elearning'], 'Education Technology (EdTech)'],
+  [['data','analytics','dashboard','reporting','visualization','insights','business intelligence'], 'Data & Analytics Platforms'],
+  [['saas','developer tool','devtool','api platform','software platform','full-stack','fullstack'], 'Full-Stack Developer Tools & SaaS'],
+];
+
+// ── STATE ──
+let allStartups = [];
+let activeKeywords = new Set(); // empty = "All"
+let currentQuery = '';
+
+// ── UTILS ──
+function escHtml(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function highlight(text, query) {
+  if (!query) return escHtml(text);
+  const esc = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return escHtml(text).replace(new RegExp(`(${esc})`, 'gi'), '<mark>$1</mark>');
+}
+
+function getInitials(name) {
+  return name.trim().split(/\s+/).map(w => w[0] || '').join('').toUpperCase().slice(0, 2) || '??';
+}
+
+function getLogoUrl(url) {
+  try {
+    return `${new URL(url).origin}/favicon.ico`;
+  } catch { return ''; }
+}
+
+function normalizeKeyword(raw) {
+  const lower = raw.toLowerCase().trim();
+  for (const [triggers, category] of KEYWORD_MAP) {
+    if (triggers.some(t => lower.includes(t) || t.includes(lower))) {
+      return category;
+    }
+  }
+  return 'Other';
+}
+
+function parseKeywords(raw) {
+  if (!raw) return [];
+  const seen = new Set();
+  const result = [];
+  String(raw).split(/[,;]+/).forEach(k => {
+    const trimmed = k.trim();
+    if (!trimmed) return;
+    const canonical = normalizeKeyword(trimmed);
+    if (!seen.has(canonical)) {
+      seen.add(canonical);
+      result.push(canonical);
+    }
+  });
+  return result;
+}
+
+// ── SIDEBAR ──
+function buildSidebar() {
+  const kwList = document.getElementById('keyword-list');
+
+  // Count keyword occurrences across all startups
+  const counts = new Map();
+  allStartups.forEach(s => {
+    s.keywords.forEach(kw => {
+      counts.set(kw, (counts.get(kw) || 0) + 1);
+    });
+  });
+
+  kwList.innerHTML = '';
+
+  // "All" row
+  const allLabel = document.createElement('label');
+  allLabel.className = 'filter-item' + (activeKeywords.size === 0 ? ' active' : '');
+  allLabel.dataset.kw = '__all__';
+  allLabel.innerHTML = `
+    <input type="checkbox" ${activeKeywords.size === 0 ? 'checked' : ''}>
+    <span class="filter-label">All</span>
+    <span class="kw-count">${allStartups.length}</span>
+  `;
+  kwList.appendChild(allLabel);
+
+  // Canonical categories in fixed order, skip any with count 0
+  CANONICAL_CATEGORIES
+    .filter(cat => counts.has(cat))
+    .forEach(cat => {
+      const count = counts.get(cat);
+      const isActive = activeKeywords.has(cat);
+      const label = document.createElement('label');
+      label.className = 'filter-item' + (isActive ? ' active' : '');
+      label.dataset.kw = cat;
+      label.innerHTML = `
+        <input type="checkbox" ${isActive ? 'checked' : ''}>
+        <span class="filter-label">${escHtml(cat)}</span>
+        <span class="kw-count">${count}</span>
+      `;
+      kwList.appendChild(label);
+    });
+
+  // Attach click handlers
+  kwList.querySelectorAll('.filter-item').forEach(label => {
+    label.addEventListener('click', e => {
+      e.preventDefault();
+      const kw = label.dataset.kw;
+      if (kw === '__all__') {
+        activeKeywords.clear();
+      } else {
+        if (activeKeywords.has(kw)) {
+          activeKeywords.delete(kw);
+        } else {
+          activeKeywords.add(kw);
+        }
+        // If nothing left selected, revert to "All"
+        if (activeKeywords.size === 0) {
+          activeKeywords.clear();
+        }
+      }
+      buildSidebar();
+      render(currentQuery);
+    });
+  });
+}
+
+// ── RENDER ──
+function render(query) {
+  currentQuery = query || '';
+  const q = currentQuery.trim().toLowerCase();
+  const list = document.getElementById('startup-list');
+  const empty = document.getElementById('empty-state');
+  const countEl = document.getElementById('search-count');
+
+  const filtered = allStartups.filter(s => {
+    // Keyword filter (OR across selected keywords)
+    if (activeKeywords.size > 0) {
+      const hasKeyword = s.keywords.some(kw => activeKeywords.has(kw));
+      if (!hasKeyword) return false;
+    }
+    // Text search filter
+    if (!q) return true;
+    const fullName = `${s.firstName} ${s.lastName}`.toLowerCase();
+    return (s.name || '').toLowerCase().includes(q)
+      || (s.description || '').toLowerCase().includes(q)
+      || fullName.includes(q)
+      || s.keywords.some(kw => kw.toLowerCase().includes(q));
+  });
+
+  list.innerHTML = '';
+
+  if (filtered.length === 0) {
+    empty.style.display = 'block';
+    document.getElementById('empty-query').textContent = q
+      ? `"${currentQuery}"`
+      : `selected keywords`;
+    countEl.textContent = '';
+    return;
+  }
+
+  empty.style.display = 'none';
+  countEl.textContent = q || activeKeywords.size > 0
+    ? `${filtered.length} result${filtered.length !== 1 ? 's' : ''}`
+    : `${filtered.length} startup${filtered.length !== 1 ? 's' : ''} in this cohort`;
+
+  filtered.forEach(s => {
+    const initials = getInitials(s.name);
+    const tagsHtml = s.keywords.length
+      ? `<div class="startup-tags">${s.keywords.map(kw => `<span class="tag">${escHtml(kw)}</span>`).join('')}</div>`
+      : '';
+
+    const item = document.createElement('div');
+    item.className = 'startup-item';
+    item.innerHTML = `
+      <div class="startup-thumb">
+        <img
+          src="${escHtml(getLogoUrl(s.liveLink))}"
+          alt="${escHtml(s.name)}"
+          loading="lazy"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+        />
+        <div class="thumb-fallback" style="display:none;width:100%;height:100%;align-items:center;justify-content:center;">${escHtml(initials)}</div>
+      </div>
+      <div class="startup-content">
+        <p class="startup-name">${highlight(s.name, currentQuery)}</p>
+        <p class="startup-creator">By <span>${escHtml(s.firstName)} ${escHtml(s.lastName)}</span></p>
+        <p class="startup-desc">${highlight(s.description, currentQuery)}</p>
+        ${tagsHtml}
+        <div class="startup-actions">
+          <a class="btn-link" href="${escHtml(s.liveLink)}" target="_blank" rel="noopener">
+            Visit app
+            <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+// ── LOAD EXCEL ──
+function findKey(row, candidates) {
+  const keys = Object.keys(row);
+  for (const c of candidates) {
+    const found = keys.find(k => k.toLowerCase().replace(/\s+/g,'') === c.toLowerCase().replace(/\s+/g,''));
+    if (found) return found;
+  }
+  return null;
+}
+
+async function loadData() {
+  const list = document.getElementById('startup-list');
+
+  try {
+    list.innerHTML = '<div class="status-msg">Loading…</div>';
+
+    const res = await fetch(EXCEL_FILE);
+    if (!res.ok) throw new Error(`Could not load ${EXCEL_FILE} (${res.status})`);
+
+    const buf = await res.arrayBuffer();
+    const wb = XLSX.read(new Uint8Array(buf), { type: 'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+    if (!rows.length) throw new Error('The spreadsheet is empty.');
+
+    const sample = rows[0];
+    const firstKey    = findKey(sample, ['First Name','FirstName','first_name','first']);
+    const lastKey     = findKey(sample, ['Last Name','LastName','last_name','last']);
+    const linkKey     = findKey(sample, ['Live Link','LiveLink','live_link','link','url','website']);
+    const descKey     = findKey(sample, ['Description','desc','about']);
+    const nameKey     = findKey(sample, ['Startup Name','StartupName','startup_name','name']);
+    const keywordsKey = findKey(sample, ['Keywords','Keyword','keywords','keyword','tags','tag']);
+
+    if (!firstKey || !lastKey || !linkKey || !descKey) {
+      throw new Error('Missing columns. Expected: First Name, Last Name, Live Link, Description.');
+    }
+
+    allStartups = rows
+      .map(r => {
+        const rawName = nameKey ? String(r[nameKey] || '').trim() : '';
+        const rawDesc = String(r[descKey] || '').trim();
+        return {
+          firstName:   String(r[firstKey] || '').trim(),
+          lastName:    String(r[lastKey] || '').trim(),
+          liveLink:    String(r[linkKey] || '').trim(),
+          description: rawDesc,
+          name:        rawName || rawDesc.split(/\s+/).slice(0, 3).join(' ') || 'Startup',
+          keywords:    parseKeywords(keywordsKey ? r[keywordsKey] : ''),
+        };
+      })
+      .filter(s => s.firstName && s.liveLink);
+
+    list.innerHTML = '';
+    buildSidebar();
+    render('');
+
+  } catch (err) {
+    list.innerHTML = `<div class="status-msg error">⚠ ${escHtml(err.message)}</div>`;
+    document.getElementById('search-count').textContent = '';
+  }
+}
+
+// ── SEARCH ──
+let debounce;
+document.getElementById('search').addEventListener('input', e => {
+  clearTimeout(debounce);
+  debounce = setTimeout(() => render(e.target.value), 180);
+});
+
+// ── INIT ──
+loadData();
+</script>
+</body>
+</html>
