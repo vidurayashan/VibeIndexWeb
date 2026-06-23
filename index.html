@@ -499,71 +499,77 @@ const CANONICAL_CATEGORIES = [
   'Other',
 ];
 
-// Each entry: [ [trigger substrings (lowercase)], canonical category ]
-// First match wins — order matters for ambiguous terms.
-const KEYWORD_MAP = [
-  [['student','academic','enrollment','enrolment','university','college','grade','course management',
-    'study plan','study planner','study tool','deadlines','assignments','course organization',
-    'scholarships','student app','student finance','student accommodation','student enrollment',
-    'study planning','academic goals','academic criteria','adaptive learning','assessment tool',
-    'check-in','quizzes','educational tool'], 'Student & Academic Management'],
-  [['rental','housing','rent','lease','tenant','landlord','accommodation','rental search',
-    'rental properties','safe housing','shared housing','renters',
-    'rent management','affordability assessment'], 'Rental & Housing Platforms'],
-  [['personal finance','expense','budget','fintech','money management','savings','spending',
-    'expense tracking','expense management','financial','finance app','financial goals',
-    'financial insights','financial management','financial planning','financial tracking',
-    'earnings tracker','spending patterns','utility splitting',
-    'budgeting','budget management','savings metrics','subscription management'], 'Personal Finance & Expense Tracking'],
-  [['mental health','wellbeing','wellness','therapy','anxiety','stress','mindfulness',
-    'mood tracking','stress management','stress levels','employee wellbeing',
-    'cycle tracking','symptom tracking','bedtime management','cognitive offloading',
-    'daily check-in','daily evaluation','personal insights','thought organization',
-    'urban loneliness','social connectivity'], 'Mental Health & Wellbeing'],
-  [['task management','task organizer','productivity','todo','to-do','schedule','planner','time management',
-    'reminders','shift scheduling','work hours','centralized workspace','collaboration','teamwork',
-    'content management','appointments','booking platform'], 'Task & Productivity Management'],
-  [['ai-powered','ai coding','ai verification','smart assistant','real-time assistance','quoting',
-    'ai','artificial intelligence','chatbot','automation','machine learning','llm','assistant',
-    'decision support','personalized recommendations'], 'AI-Powered Assistants & Automation'],
-  [['real estate','realty','listing management','property listings','document verification'], 'Property & Real Estate Management'],
-  [['food ordering','food tracking','food waste','surplus food','waste reduction','waste tracking',
-    'expiry dates','shopping lists','woolworths','coles','aldi','flash deals',
-    'food','grocery','meal','recipe','nutrition','dining','ingredient'], 'Food & Grocery Solutions'],
-  [['ecommerce','e-commerce','marketplace','shopping','retail','buy and sell','online store',
-    'resale','thrift','returns management','shopping basket','gifting','furniture',
-    'clothing deals','designer directory','eco-friendly','sustainability'], 'E-Commerce & Marketplaces'],
-  [['clinics','swim analytics','swimmer profiles','competitive swimming','appointment preparation',
-    'emergency services','queue management','wait times',
-    'health','healthcare','medical','doctor','patient','fitness','clinical','hospital'], 'Health & Healthcare Applications'],
-  [['community building','community support','social networking','event discovery',
-    'community','social network','forum','group','connect','peer',
-    'sharing','user-generated content','reviews','young adults'], 'Community & Social Networking'],
-  [['ride-sharing','bus information','trip management','visa limits',
-    'travel','transport','mobility','ride','booking','trip','flight','commute'], 'Travel & Mobility'],
-  [['career tools','coaches',
-    'career','job','employment','resume','hiring','recruitment','internship'], 'Career & Employment Tools'],
-  [['business operation','workflow','crm','erp','operations management','process',
-    'compliance','role-based access','customer service','delivery system',
-    'reservation system','real-time notifications','businesses'], 'Business Operations & Workflow Management'],
-  [['inventory management','stock analysis',
-    'inventory','asset management','stock','warehouse','supply chain'], 'Inventory & Asset Management'],
-  [['tradies','australian homeowners',
-    'home service','trades','plumber','electrician','cleaner','handyman','maintenance'], 'Home Services & Trades Platforms'],
-  [['womens clothing','size suggestions','sizing','fit profile','fit profiles',
-    'fashion','clothing','style','wardrobe','outfit','personal shopping','apparel',
-    'beauty','skincare'], 'Fashion & Personal Shopping'],
-  [['edtech','learning','tutoring','teaching','e-learning','elearning',
-    'educational','adaptive learning','academic'], 'Education Technology (EdTech)'],
-  [['data management','data storage','data visualization','data security','quantitative research',
-    'financial insights','real-time data','stock analysis','swim analytics',
-    'data','analytics','dashboard','reporting','visualization','insights','business intelligence'], 'Data & Analytics Platforms'],
-  [['fastapi','flask','typescript','backend development','frontend development','full-stack development',
-    'full-stack app','python backend','cloud deployment','cloud storage','cloud-based','crud',
-    'api integration','debugging','environment variables',
-    'saas','developer tool','devtool','api platform','software platform','full-stack','fullstack',
-    'full stack','react','backend','frontend','supabase','deployment'], 'Full-Stack Developer Tools & SaaS'],
-];
+// Curated keywords per startup, derived from app descriptions
+const STARTUP_KEYWORDS = {
+  'Kaisync': ["Full-Stack Developer Tools & SaaS"],
+  'SafeHouse': ["Rental & Housing Platforms", "Student & Academic Management"],
+  'TradeLink': ["Home Services & Trades Platforms", "AI-Powered Assistants & Automation", "Business Operations & Workflow Management"],
+  'BUMA': ["Full-Stack Developer Tools & SaaS"],
+  'planIT': ["Student & Academic Management", "Task & Productivity Management"],
+  'UPAHAR': ["E-Commerce & Marketplaces", "Community & Social Networking"],
+  'RoomEase': ["Rental & Housing Platforms", "Student & Academic Management"],
+  'AdaptIQ': ["Education Technology (EdTech)", "AI-Powered Assistants & Automation", "Student & Academic Management"],
+  'EarnTrack AU': ["Personal Finance & Expense Tracking", "Student & Academic Management"],
+  'MindCheck': ["Mental Health & Wellbeing"],
+  'ComplyNest': ["Business Operations & Workflow Management", "Task & Productivity Management"],
+  'ContextSwitch': ["Mental Health & Wellbeing", "Task & Productivity Management"],
+  'Tally': ["Personal Finance & Expense Tracking", "Community & Social Networking"],
+  'BondBack': ["Rental & Housing Platforms", "Property & Real Estate Management"],
+  'Mind Track': ["Mental Health & Wellbeing"],
+  'LifeAdmin AI': ["Task & Productivity Management", "AI-Powered Assistants & Automation"],
+  'Ledgerly': ["Personal Finance & Expense Tracking"],
+  'EduEnroll': ["Student & Academic Management", "Education Technology (EdTech)"],
+  'Unknown': ["Food & Grocery Solutions", "Business Operations & Workflow Management"],
+  'FocusFlow': ["Task & Productivity Management", "Student & Academic Management"],
+  'EcoEats': ["Food & Grocery Solutions", "Community & Social Networking"],
+  'RentSplit': ["Personal Finance & Expense Tracking", "Rental & Housing Platforms"],
+  'TrustWork': ["Full-Stack Developer Tools & SaaS"],
+  'UniCollab': ["Student & Academic Management", "Community & Social Networking"],
+  'ShiftSync': ["Business Operations & Workflow Management", "Task & Productivity Management"],
+  'Heracles': ["Community & Social Networking", "Full-Stack Developer Tools & SaaS"],
+  'BusTruth': ["Travel & Mobility"],
+  'Shopping Optimiser': ["Food & Grocery Solutions", "Personal Finance & Expense Tracking"],
+  'SocialShift': ["Community & Social Networking", "Mental Health & Wellbeing"],
+  'FindMyFit': ["Fashion & Personal Shopping", "E-Commerce & Marketplaces"],
+  'GradeWise': ["Student & Academic Management", "Education Technology (EdTech)", "AI-Powered Assistants & Automation"],
+  'QueueAI': ["Business Operations & Workflow Management", "AI-Powered Assistants & Automation", "Health & Healthcare Applications"],
+  'Eat It Up': ["Food & Grocery Solutions", "Inventory & Asset Management"],
+  'Haizier': ["Data & Analytics Platforms", "Personal Finance & Expense Tracking"],
+  'RYDO': ["AI-Powered Assistants & Automation", "Full-Stack Developer Tools & SaaS"],
+  'PantrMeal': ["Food & Grocery Solutions", "Task & Productivity Management"],
+  'ScholarFinder': ["Student & Academic Management", "Career & Employment Tools"],
+  'Basketly': ["Food & Grocery Solutions", "Personal Finance & Expense Tracking"],
+  'BloomTrack': ["Inventory & Asset Management", "Business Operations & Workflow Management"],
+  'DokanXpress': ["E-Commerce & Marketplaces", "Business Operations & Workflow Management"],
+  'NestTrip': ["Travel & Mobility"],
+  'Spendwise': ["Personal Finance & Expense Tracking"],
+  'Designer Finder': ["Community & Social Networking", "Career & Employment Tools"],
+  'PrepDoc': ["Health & Healthcare Applications"],
+  'MASQUE': ["Fashion & Personal Shopping", "E-Commerce & Marketplaces"],
+  'FlowPilot': ["Business Operations & Workflow Management", "Task & Productivity Management"],
+  'The Haven': ["Mental Health & Wellbeing", "Business Operations & Workflow Management"],
+  'StudyFit': ["Student & Academic Management", "AI-Powered Assistants & Automation", "Education Technology (EdTech)"],
+  'SmartSplit': ["Personal Finance & Expense Tracking", "Community & Social Networking"],
+  'ARCHIVE': ["E-Commerce & Marketplaces", "Fashion & Personal Shopping", "AI-Powered Assistants & Automation"],
+  'HomeVice': ["Home Services & Trades Platforms"],
+  'QueueSmart': ["Business Operations & Workflow Management", "Health & Healthcare Applications"],
+  'Subiqo': ["Personal Finance & Expense Tracking"],
+  'AquaMetrics': ["Health & Healthcare Applications", "Data & Analytics Platforms"],
+  'APPLYFY': ["Career & Employment Tools", "Student & Academic Management"],
+  'SkillSnap': ["Career & Employment Tools"],
+  'Earnly': ["Personal Finance & Expense Tracking", "Career & Employment Tools"],
+  'PriceMatch': ["Fashion & Personal Shopping", "E-Commerce & Marketplaces"],
+  'Tap&Book': ["Health & Healthcare Applications", "Travel & Mobility"],
+  'SmartSpend': ["Personal Finance & Expense Tracking"],
+  'FurniLoop': ["Community & Social Networking", "E-Commerce & Marketplaces"],
+  'HemoSense': ["Health & Healthcare Applications", "Mental Health & Wellbeing"],
+  'MindTrack': ["Mental Health & Wellbeing", "Student & Academic Management"],
+  'RentReady': ["Rental & Housing Platforms", "Property & Real Estate Management"],
+  'SplitTrack': ["Personal Finance & Expense Tracking", "Rental & Housing Platforms"],
+  'Aayudh International': ["Health & Healthcare Applications", "E-Commerce & Marketplaces"],
+  'CampusRide': ["Travel & Mobility", "Student & Academic Management", "AI-Powered Assistants & Automation"],
+};
+
 
 // ── STATE ──
 let allStartups = [];
@@ -591,30 +597,8 @@ function getLogoUrl(url) {
   } catch { return ''; }
 }
 
-function normalizeKeyword(raw) {
-  const lower = raw.toLowerCase().trim();
-  for (const [triggers, category] of KEYWORD_MAP) {
-    if (triggers.some(t => lower.includes(t) || t.includes(lower))) {
-      return category;
-    }
-  }
-  return 'Other';
-}
-
-function parseKeywords(raw) {
-  if (!raw) return [];
-  const seen = new Set();
-  const result = [];
-  String(raw).split(/[,;]+/).forEach(k => {
-    const trimmed = k.trim();
-    if (!trimmed) return;
-    const canonical = normalizeKeyword(trimmed);
-    if (!seen.has(canonical)) {
-      seen.add(canonical);
-      result.push(canonical);
-    }
-  });
-  return result;
+function getKeywordsForStartup(name) {
+  return STARTUP_KEYWORDS[name] || ['Other'];
 }
 
 // ── SIDEBAR ──
@@ -805,7 +789,7 @@ async function loadData() {
           liveLink:    String(r[linkKey] || '').trim(),
           description: rawDesc,
           name:        rawName || rawDesc.split(/\s+/).slice(0, 3).join(' ') || 'Startup',
-          keywords:    parseKeywords(keywordsKey ? r[keywordsKey] : ''),
+          keywords:    getKeywordsForStartup(rawName),
         };
       })
       .filter(s => s.firstName && s.liveLink);
